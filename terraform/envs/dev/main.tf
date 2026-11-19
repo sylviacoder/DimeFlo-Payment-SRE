@@ -54,7 +54,7 @@ resource "aws_ecr_repository" "payments_api" {
 
 resource "aws_ecr_lifecycle_policy" "payments_api" {
   repository = aws_ecr_repository.payments_api.name
-  policy = jsonencode({
+  policy     = jsonencode({
     rules = [{
       rulePriority = 1
       description  = "Keep the 20 most recent images"
