@@ -1,0 +1,31 @@
+name: terraform
+
+on:
+  pull_request:
+    paths: ["terraform/**"]
+  push:
+    branches: [main]
+    paths: ["terraform/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: hashicorp/setup-terraform@v4
+
+      - name: Format check
+        run: terraform fmt -check -recursive terraform
+
+      - name: Validate dev environment
+        working-directory: terraform/envs/dev
+        run: |
+          terraform init -backend=false
+          terraform validate
+
+  # Add a plan job once AWS access is set up with GitHub OIDC
+  # (no long-lived access keys stored in GitHub secrets).

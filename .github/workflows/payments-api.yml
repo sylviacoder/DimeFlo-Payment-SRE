@@ -1,0 +1,34 @@
+name: payments-api
+
+on:
+  pull_request:
+    paths: ["services/payments-api/**"]
+  push:
+    branches: [main]
+    paths: ["services/payments-api/**"]
+
+permissions:
+  contents: read
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: services/payments-api
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 26
+          cache: npm
+          cache-dependency-path: services/payments-api/package-lock.json
+
+      - run: npm ci
+      - run: npm test
+
+      - name: Build image
+        run: docker build -t payments-api:${{ github.sha }} .
+
+  # Add an ECR push job once GitHub OIDC access to AWS is set up.
