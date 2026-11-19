@@ -1,0 +1,14 @@
+# Exposes ONLY the public port. The admin/chaos port (9090) is deliberately not listed,
+# so nothing outside the pod can reach it. Use: kubectl -n payments port-forward deploy/payments-api 9090
+apiVersion: v1
+kind: Service
+metadata:
+  name: payments-api
+  namespace: payments
+spec:
+  selector:
+    app: payments-api
+  ports:
+    - name: http
+      port: 80
+      targetPort: http

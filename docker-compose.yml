@@ -1,0 +1,41 @@
+# Local stack: Postgres + payments-api, no AWS needed.
+#   docker compose up --build
+#   curl localhost:8080/readyz
+services:
+  postgres:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_DB: dimeflo
+      POSTGRES_USER: dimeflo
+      POSTGRES_PASSWORD: localdev   # local only, never used outside this file
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dimeflo -d dimeflo"]
+      interval: 2s
+      retries: 15
+
+  migrate:
+    build: ./services/payments-api
+    command: ["node", "src/migrate.js"]
+    environment: &db_env
+      PGHOST: postgres
+      PGDATABASE: dimeflo
+      PGUSER: dimeflo
+      PGPASSWORD: localdev
+      SEED_DEV_DATA: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  payments-api:
+    build: ./services/payments-api
+    environment:
+      <<: *db_env
+      CHAOS_ENABLED: "true"
+    ports:
+      - "8080:8080"
+      - "127.0.0.1:9090:9090"   # admin/chaos port bound to localhost only
+    depends_on:
+      migrate:
+        condition: service_completed_successfully

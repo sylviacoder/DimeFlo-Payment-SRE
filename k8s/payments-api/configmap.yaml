@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: payments-api
+  namespace: payments
+data:
+  PGDATABASE: dimeflo
+  PGPORT: "5432"
+  PGSSLMODE: require
+  PG_POOL_MAX: "10"
+  PG_STATEMENT_TIMEOUT_MS: "5000"
+  MAX_TRANSFER_PENCE: "500000"
+  # true in dev so chaos tests can run; false in any real environment.
+  CHAOS_ENABLED: "true"

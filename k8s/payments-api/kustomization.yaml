@@ -1,0 +1,18 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources:
+  - namespace.yaml
+  - configmap.yaml
+  - deployment.yaml
+  - service.yaml
+  - hpa.yaml
+  - pdb.yaml
+# Point the image at your ECR repo and tag, then apply:
+#   cd k8s/payments-api
+#   kustomize edit set image payments-api=$(terraform -chdir=../../terraform/envs/dev output -raw ecr_repository_url):<git-sha>
+#   kubectl apply -k .
+# migrate-job.yaml is applied on its own before each release (set its image to the same tag).
+images:
+  - name: payments-api
+    newName: payments-api
+    newTag: latest

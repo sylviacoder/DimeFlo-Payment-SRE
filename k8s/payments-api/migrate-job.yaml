@@ -1,0 +1,34 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: payments-api-migrate
+  namespace: payments
+spec:
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: migrate
+          image: <account-id>.dkr.ecr.eu-west-2.amazonaws.com/dimeflo/payments-api:<tag>
+          command: ["node", "src/migrate.js"]
+          envFrom:
+            - configMapRef:
+                name: payments-api
+            - secretRef:
+                name: payments-db
+          env:
+            - name: SEED_DEV_DATA
+              value: "true"
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
